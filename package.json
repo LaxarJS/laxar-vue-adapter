@@ -1,0 +1,24 @@
+{
+  "name": "laxar-vue-adapter",
+  "version": "0.0.1-pre",
+  "description": "Write LaxarJS widgets and controls with Vue.js",
+  "main": "laxar-vue-adapter.js",
+  "peerDependencies": {
+    "laxar": "^2.0.0-alpha.9",
+    "vue": "^2.0.3"
+  },
+  "keywords": [
+    "LaxarJS",
+    "VueJS",
+    "Widget",
+    "Control"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LaxarJS/laxar-vue-adapter/issues"
+  },
+  "homepage": "https://github.com/LaxarJS/laxar-vue-adapter#readme",
+  "dependencies": {
+    "vue": "^2.0.3"
+  }
+}
