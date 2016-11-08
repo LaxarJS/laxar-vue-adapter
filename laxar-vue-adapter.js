@@ -41,9 +41,7 @@ export function bootstrap( {}, { widgetLoader, artifactProvider } ) {
       return provideComponent( provider, components.widgets )
          .then( mixinInjections )
          .then( Component => {
-            const injections = Component.options.injections
-               .map( name => ( { [ name ]: services[ name ] } ) )
-               .reduce( ( a, b ) => ( { ...a, ...b } ) );
+            const injections = provideInjections( Component.options.injections, services );
 
             onBeforeControllerCreation( injections );
 
@@ -84,15 +82,15 @@ export function bootstrap( {}, { widgetLoader, artifactProvider } ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   function provideComponent( artifactProviderForComponent, cache = {} ) {
-      return artifactProviderForComponent.descriptor()
+   function provideComponent( provider, cache = {} ) {
+      return provider.descriptor()
          .then( ( { name, controls = [] } ) => {
             if( cache[ name ] ) {
                return cache[ name ];
             }
 
             return ( cache[ name ] = Promise.all( [
-               artifactProviderForComponent.module(),
+               provider.module(),
                provideComponents( controls.map( artifactProvider.forControl ), components.controls )
             ] ).then( ( [ module, controls ] ) => Vue.extend( {
                ...module,
@@ -107,15 +105,29 @@ export function bootstrap( {}, { widgetLoader, artifactProvider } ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   function provideComponents( artifactProvidersForComponents, cache = {} ) {
-      return Promise.all( artifactProvidersForComponents.map( artifactProviderForComponent => {
-         return Promise.all( [
-            artifactProviderForComponent.descriptor(),
-            provideComponent( artifactProviderForComponent, cache )
-         ] ).then( ( [ { name }, component ] ) => ( { [ name ]: component } ) );
-      } ) ).then( controls => controls.reduce( ( a, b ) => ( { ...a, ...b } ), {} ) );
+   function provideComponents( providers, cache = {} ) {
+      return Promise.all( providers.map( provider => Promise.all( [
+         provider.descriptor(),
+         provideComponent( provider, cache )
+      ] ) ) ).then( controls => controls.reduce( ( components, [ { name }, component ] ) => {
+         components[ name ] = component;
+         return components;
+      }, {} ) );
    }
 
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function provideInjections( injections, services ) {
+      return injections.reduce( ( injections, injection ) => {
+         if( !services[ injection ] ) {
+            throw adapterErrors.unknownInjection( { technology, injection, widgetName } );
+         }
+         injections[ injection ] = services[ injection ];
+         return injections;
+      }, {
+         axContext: services.axContext
+      } );
+   }
 }
 
 function mixinInjections( Component ) {
@@ -129,7 +141,7 @@ function mixinInjections( Component ) {
       data() {
          return this.$options.injections.axContext;
       },
-      injections: [ 'axContext' ].concat( injections )
+      injections: injections
    } );
 }
 
