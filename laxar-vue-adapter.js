@@ -123,7 +123,7 @@ function mixinInjections( Component ) {
    const injections = Component.options.injections || [];
 
    return Component.extend( {
-      created() {
+      beforeCreate() {
          this.$injections = injections
             .map( name => this.$options.injections[ name ] );
       },
