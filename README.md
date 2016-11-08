@@ -118,7 +118,7 @@ The control will then be registered as a component with the name specified in it
       "technology": "vue",
       "type": "widget"
    },
-   "controls": "my-vue-control-module"
+   "controls": [ "my-vue-control-module" ]
 }
 ```
 
