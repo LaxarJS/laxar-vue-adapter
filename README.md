@@ -9,6 +9,10 @@ and put the whole widget into a single `.vue` file.
 
 # Separate files:
 
+Note that in this case the template will be compiled on-the-fly in the user's browser and
+might incur a slight performance penalty. You will also have to make sure that `vue` resolves
+to the so-called "standalone build" of Vue.js. (See `webpack.config` below)
+
 ```html
 <!-- default.theme/my-widget.html -->
 <b>{counter}}</b>
@@ -31,12 +35,26 @@ export default {
 }
 ```
 
+```js
+// webpack.config.js
+module.exports = {
+   resolve: {
+      alias: {
+         'vue': 'vue/dist/vue.min.js'
+      }
+   }
+};
+```
+
 # Single file
+
+In this example the `vue-loader` will preprocess the `.vue` file and compile the template to
+a JavaScript function.
 
 ```vue
 <!-- my-widget.vue -->
 <template>
-   <b>{{counter}}</b>
+   <b class="counter">{{counter}}</b>
 </template>
 
 <script>
@@ -54,6 +72,12 @@ export default {
    }
 }
 </script>
+
+<style>
+.counter {
+   color: red;
+}
+</stlye>
 ```
 
 ```js
@@ -148,3 +172,37 @@ export default {
 </script>
 ```
 
+# Theming
+
+Theme directories are fully supported. Additionally, if you are using the `vue-loader`, the
+default theme template and CSS can be embedded in the `.vue` file. However, the HTML and CSS
+corresponding to the default theme will be present in the bundled application regardless of
+the theme used for bundling. If that is an issue, we recommend using separate files for the
+HTML template and CSS.
+
+# Precompiling themed assets
+
+_Bonus feature_: You can also use the `vue-loader` to precompile your template HTML (and CSS).
+Just specify a Vue.js component file as your `templateSource` and make sure it gets processed
+by the `vue-loader`.
+
+
+```json
+{
+   "name": "my-widget",
+   "templateSource": "my-widget.vue"
+}
+```
+
+```vue
+<!-- default.theme/my-widget.vue -->
+<template>
+   <b class="counter">{{counter}}</b>
+</template>
+
+<style>
+.counter {
+   color: red;
+}
+</style>
+```

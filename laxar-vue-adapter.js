@@ -36,7 +36,6 @@ export function bootstrap( {}, { widgetLoader, artifactProvider } ) {
    function create( { widgetName, anchorElement, services, onBeforeControllerCreation } ) {
 
       const provider = artifactProvider.forWidget( widgetName );
-      let vm = null;
 
       return provideComponent( provider, components.widgets )
          .then( mixinInjections )
@@ -45,39 +44,29 @@ export function bootstrap( {}, { widgetLoader, artifactProvider } ) {
 
             onBeforeControllerCreation( injections );
 
-            vm = new Component( { injections } );
+            const vm = new Component( { injections } );
 
             return {
-               domAttachTo,
-               domDetach,
-               destroy
+               domAttachTo( areaElement, templateHtml ) {
+                  if( templateHtml ) {
+                     const res = compileTemplate( services, templateHtml );
+                     vm.$options.render = res.render;
+                     vm.$options.staticRenderFns = res.staticRenderFns;
+                  }
+                  vm.$mount( anchorElement, true );
+                  areaElement.appendChild( anchorElement );
+               },
+               domDetach() {
+                  const parent = anchorElement.parentNode;
+                  if( parent ) {
+                     parent.removeChild( anchorElement );
+                  }
+               },
+               destroy() {
+                  vm.$destroy();
+               }
             };
          } );
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      function domAttachTo( areaElement, templateHtml ) {
-         if( templateHtml ) {
-            compileTemplate( services, templateHtml, vm );
-         }
-         vm.$mount( anchorElement, true );
-         areaElement.appendChild( anchorElement );
-      }
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      function domDetach() {
-         const parent = anchorElement.parentNode;
-         if( parent ) {
-            parent.removeChild( anchorElement );
-         }
-      }
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      function destroy() {
-         vm.$destroy();
-      }
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -85,21 +74,21 @@ export function bootstrap( {}, { widgetLoader, artifactProvider } ) {
    function provideComponent( provider, cache = {} ) {
       return provider.descriptor()
          .then( ( { name, controls = [] } ) => {
-            if( cache[ name ] ) {
-               return cache[ name ];
+            if( !cache[ name ] ) {
+               cache[ name ] = Promise.all( [
+                  provider.module(),
+                  provideComponents( controls.map( artifactProvider.forControl ), components.controls )
+               ] ).then( ( [ module, controls ] ) => Vue.extend( {
+                  ...module,
+                  _Ctor: null,
+                  components: {
+                     ...controls,
+                     ...module.components
+                  }
+               } ) );
             }
 
-            return ( cache[ name ] = Promise.all( [
-               provider.module(),
-               provideComponents( controls.map( artifactProvider.forControl ), components.controls )
-            ] ).then( ( [ module, controls ] ) => Vue.extend( {
-               ...module,
-               _Ctor: null,
-               components: {
-                  ...controls,
-                  ...module.components
-               }
-            } ) ) );
+            return cache[ name ];
          } );
    }
 
@@ -145,16 +134,17 @@ function mixinInjections( Component ) {
    } );
 }
 
-function compileTemplate( services, template, vm ) {
-   if( /\bdata-v-/.test( template ) ) {
-      services.axLog.warn( 'Widget template seems to contain data-v- prefix not supported by Vue.js.' );
+function compileTemplate( services, template ) {
+   if( typeof template === 'object' && typeof template.render === 'function' ) {
+      return template;
    }
    if( !Vue.compile ) {
       services.axLog.error( 'Compiling templates on-the-fly requires "vue" to resolve to a standalone build of Vue.js.' );
-      return;
+      return {};
+   }
+   if( /\bdata-v-/.test( template ) ) {
+      services.axLog.warn( 'Widget template seems to contain data-v- prefix not supported by Vue.js.' );
    }
 
-   const res = Vue.compile( template );
-   vm.$options.render = res.render;
-   vm.$options.staticRenderFns = res.staticRenderFns;
+   return Vue.compile( template );
 }
