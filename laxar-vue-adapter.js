@@ -91,8 +91,15 @@ export function bootstrap( {}, { widgetLoader, artifactProvider, log } ) {
                   provider.module(),
                   provideComponents( controls.map( artifactProvider.forControl ), components.controls )
                ] ).then( ( [ module, controls ] ) => Vue.extend( {
+                  // modules loaded with the vue-loader have a _Ctor property which causes them to be non-
+                  // extensible with Vue.extend
                   ...module,
                   _Ctor: null,
+                  // store name from descriptor so it is available to provideComponents and so that
+                  // components can be nested recursively in their HTML templates
+                  name,
+                  // register control components locally, but also allow modules to just import
+                  // components themselves
                   components: {
                      ...controls,
                      ...module.components
@@ -107,13 +114,12 @@ export function bootstrap( {}, { widgetLoader, artifactProvider, log } ) {
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function provideComponents( providers, cache = {} ) {
-      return Promise.all( providers.map( provider => Promise.all( [
-         provider.descriptor(),
-         provideComponent( provider, cache )
-      ] ) ) ).then( controls => controls.reduce( ( components, [ { name }, component ] ) => {
-         components[ name ] = component;
-         return components;
-      }, {} ) );
+      return Promise.all( providers.map( provider => provideComponent( provider, cache ) ) )
+         .then( components => components.reduce( ( components, component ) => {
+            const { name } = component.options;
+            components[ name ] = component;
+            return components;
+         }, {} ) );
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
