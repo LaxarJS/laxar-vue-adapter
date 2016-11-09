@@ -38,13 +38,12 @@ export function bootstrap( {}, { widgetLoader, artifactProvider, log } ) {
       const provider = artifactProvider.forWidget( widgetName );
 
       return provideComponent( provider, components.widgets )
-         .then( mixinInjections )
          .then( Component => {
-            const injections = provideInjections( Component.options.injections, services );
+            const mixin = injectionsMixin( Component.options.injections, services );
 
-            onBeforeControllerCreation( injections );
+            onBeforeControllerCreation( mixin.injections );
 
-            const vm = new Component( { injections } );
+            const vm = new Component( { mixins: [ mixin ] } );
 
             return {
                domAttachTo( areaElement, templateHtml ) {
@@ -122,32 +121,25 @@ export function bootstrap( {}, { widgetLoader, artifactProvider, log } ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   function provideInjections( injections, services ) {
-      return injections.reduce( ( injections, injection ) => {
-         if( !services[ injection ] ) {
-            throw adapterErrors.unknownInjection( { technology, injection, widgetName } );
-         }
-         injections[ injection ] = services[ injection ];
-         return injections;
-      }, {
-         axContext: services.axContext
-      } );
+   function injectionsMixin( injections = [], services ) {
+      return {
+         beforeCreate() {
+            this.$injections = injections
+               .map( name => this.$options.injections[ name ] );
+         },
+         data() {
+            return this.$options.injections.axContext;
+         },
+         injections: [ 'axContext', ...injections ].reduce( ( injections, injection ) => {
+            if( !services[ injection ] ) {
+               throw adapterErrors.unknownInjection( { technology, injection, widgetName } );
+            }
+            injections[ injection ] = services[ injection ];
+            return injections;
+         }, {} )
+      };
    }
-}
 
-function mixinInjections( Component ) {
-   const injections = Component.options.injections || [];
-
-   return Component.extend( {
-      beforeCreate() {
-         this.$injections = injections
-            .map( name => this.$options.injections[ name ] );
-      },
-      data() {
-         return this.$options.injections.axContext;
-      },
-      injections: injections
-   } );
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////

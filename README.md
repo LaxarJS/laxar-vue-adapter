@@ -48,9 +48,9 @@ export default {
       counter: 0
    },
    created() {
-      this.interval = setInterval(() => {
+      this.interval = setInterval( () => {
          this.counter++;
-      }, 1000);
+      }, 1000 );
    },
    destroyed() {
       clearInterval(this.interval);
@@ -106,7 +106,7 @@ export default {
 .counter {
    color: red;
 }
-</stlye>
+</style>
 ```
 
 Make sure [`vue-loader`][vue-loader] is installed and set your `webpack.config.js` accordingly.
@@ -164,7 +164,7 @@ access the `id()` generator, the event bus and the features configured for your 
 
 ```js
 export default {
-   template: '<b :id="id('some-suffix')">{{features.mytext}}</b>',
+   template: '<b :id="id(\'some-suffix\')">{{features.mytext}}</b>',
    created() {
       this.eventBus.subscribe( 'some-event', this.methods.eventHandler );
    },
