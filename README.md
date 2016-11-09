@@ -7,7 +7,7 @@ You can either use the familiar directory structure with separate `.js`, `.html`
 and `.css` files, or you can use the [`vue-loader`](https://vue-loader.vuejs.org/en/index.html)
 and put the whole widget into a single `.vue` file.
 
-# Separate files:
+## Separate files
 
 Note that in this case the template will be compiled on-the-fly in the user's browser and
 might incur a slight performance penalty. You will also have to make sure that `vue` resolves
@@ -46,7 +46,7 @@ module.exports = {
 };
 ```
 
-# Single file
+## Single file
 
 In this example the `vue-loader` will preprocess the `.vue` file and compile the template to
 a JavaScript function.
@@ -95,7 +95,7 @@ module.exports = {
 };
 ```
 
-# Injections
+## Injections
 
 You can inject _LaxarJS_ [widget services](https://github.com/LaxarJS/laxar/blob/master/docs/manuals/widget_services.md)
 into your Vue.js component by using the `injections` option. Your component will then be instantiated with
@@ -130,7 +130,7 @@ export default {
 };
 ```
 
-# Controls
+## Controls
 
 You can specify controls in your `widget.json`. Just list a module that can resolved by the module loader.
 The control will then be [registered locally](https://vuejs.org/v2/guide/components.html#Local-Registration)
@@ -173,7 +173,7 @@ export default {
 </script>
 ```
 
-# Theming
+## Theming
 
 Theme directories are fully supported. Additionally, if you are using the `vue-loader`, the
 default theme template and CSS can be embedded in the `.vue` file. However, the HTML and CSS
@@ -181,7 +181,7 @@ corresponding to the default theme will be present in the bundled application re
 the theme used for bundling. If that is an issue, we recommend using separate files for the
 HTML template and CSS.
 
-# Precompiling themed assets
+## Precompiling themed assets
 
 _Bonus feature_: You can also use the `vue-loader` to precompile your template HTML (and CSS).
 Just specify a Vue.js component file as your `templateSource` and make sure it gets processed
