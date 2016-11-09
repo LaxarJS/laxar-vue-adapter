@@ -133,7 +133,8 @@ export default {
 # Controls
 
 You can specify controls in your `widget.json`. Just list a module that can resolved by the module loader.
-The control will then be registered as a component with the name specified in its `control.json`.
+The control will then be [registered locally](https://vuejs.org/v2/guide/components.html#Local-Registration)
+as a component with the name specified in its `control.json`.
 
 ```json
 {
