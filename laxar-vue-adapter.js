@@ -17,7 +17,7 @@ export const technology = 'vue';
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export function bootstrap( {}, { widgetLoader, artifactProvider } ) {
+export function bootstrap( {}, { widgetLoader, artifactProvider, log } ) {
 
    const { adapterErrors } = widgetLoader;
 
@@ -49,9 +49,21 @@ export function bootstrap( {}, { widgetLoader, artifactProvider } ) {
             return {
                domAttachTo( areaElement, templateHtml ) {
                   if( templateHtml ) {
-                     const res = compileTemplate( services, templateHtml );
+                     const res = compileTemplate( templateHtml, log );
+
                      vm.$options.render = res.render;
                      vm.$options.staticRenderFns = res.staticRenderFns;
+
+                     // attach beforeCreate, beforeDestroy hooks to enable hot reload
+                     if( res.beforeCreate ) {
+                        vm.$options.beforeCreate.push.apply( vm.$options.beforeCreate, res.beforeCreate );
+
+                        // call beforeCreate hook manually because the component is already created
+                        res.beforeCreate.forEach( fn => fn.apply( vm ) );
+                     }
+                     if( res.beforeDestroy ) {
+                        vm.$options.beforeDestroy.push.apply( vm.$options.beforeDestroy, res.beforeDestroy );
+                     }
                   }
                   vm.$mount( anchorElement, true );
                   areaElement.appendChild( anchorElement );
@@ -134,16 +146,15 @@ function mixinInjections( Component ) {
    } );
 }
 
-function compileTemplate( services, template ) {
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function compileTemplate( template, log ) {
    if( typeof template === 'object' && typeof template.render === 'function' ) {
-      return template;
+      return template; // already compiled, return unmodified
    }
    if( !Vue.compile ) {
-      services.axLog.error( 'Compiling templates on-the-fly requires "vue" to resolve to a standalone build of Vue.js.' );
+      log.error( 'Compiling templates on-the-fly requires "vue" to resolve to a standalone build of Vue.js.' );
       return {};
-   }
-   if( /\bdata-v-/.test( template ) ) {
-      services.axLog.warn( 'Widget template seems to contain data-v- prefix not supported by Vue.js.' );
    }
 
    return Vue.compile( template );
