@@ -223,14 +223,14 @@ export default {
 ### Theming
 
 Theme directories are fully supported. Additionally, if you are using the `vue-loader`, the
-default theme template and CSS can be embedded in the `.vue` file. However, the HTML and CSS
+default HTML and CSS can be embedded in the main `.vue` file. However, the HTML and CSS
 corresponding to the default theme will be present in the bundled application regardless of
 the theme used for bundling. If that is an issue, we recommend using separate files for the
 HTML template and CSS.
 
 #### Precompiling themed assets
 
-You can also use the `vue-loader` to precompile your template HTML (and CSS).
+You can also use the `vue-loader` to precompile your themed HTML and CSS.
 Just specify a Vue.js component file as your `templateSource` and make sure it gets processed
 by the `vue-loader`.
 
@@ -243,7 +243,7 @@ by the `vue-loader`.
 ```
 
 ```vue
-<!-- default.theme/my-widget.vue -->
+<!-- any.theme/my-widget.vue -->
 <template>
    <b class="counter">{{counter}}</b>
 </template>
