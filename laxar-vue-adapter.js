@@ -55,14 +55,12 @@ export function bootstrap( {}, { widgetLoader, artifactProvider, log } ) {
                      vm.$options.staticRenderFns = res.staticRenderFns;
 
                      // attach beforeCreate, beforeDestroy hooks to enable hot reload
-                     if( res.beforeCreate ) {
+                     if( res.beforeCreate && res.beforeDestroy ) {
                         vm.$options.beforeCreate.push.apply( vm.$options.beforeCreate, res.beforeCreate );
+                        vm.$options.beforeDestroy.push.apply( vm.$options.beforeDestroy, res.beforeDestroy );
 
                         // call beforeCreate hook manually because the component is already created
                         res.beforeCreate.forEach( fn => fn.apply( vm ) );
-                     }
-                     if( res.beforeDestroy ) {
-                        vm.$options.beforeDestroy.push.apply( vm.$options.beforeDestroy, res.beforeDestroy );
                      }
                   }
                   vm.$mount( anchorElement, true );
