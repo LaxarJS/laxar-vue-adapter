@@ -8,7 +8,7 @@
   - [Single file components](#single-file-components)
 - [LaxarJS integration](#laxarjs-integration)
   - [Injections](#injections)
-  - [Default injections, axContext](#default-injections-axcontext)
+  - [axContext](#axcontext)
   - [Controls](#controls)
   - [Theming](#theming)
   
@@ -222,7 +222,7 @@ export default {
 ```
 
 
-### Injections in controls
+#### Injections in controls
 
 Controls can access some global services via injections. The services of the widget that uses the control
 can be injected as `axWidgetServices`.
