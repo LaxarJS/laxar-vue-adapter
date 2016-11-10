@@ -61,18 +61,7 @@ export function bootstrap( {}, adapterServices ) {
                domAttachTo( areaElement, templateHtml ) {
                   if( templateHtml ) {
                      const res = compileTemplate( templateHtml, log );
-
-                     vm.$options.render = res.render;
-                     vm.$options.staticRenderFns = res.staticRenderFns;
-
-                     // attach beforeCreate, beforeDestroy hooks to enable hot reload
-                     if( res.beforeCreate && res.beforeDestroy ) {
-                        vm.$options.beforeCreate.push.apply( vm.$options.beforeCreate, res.beforeCreate );
-                        vm.$options.beforeDestroy.push.apply( vm.$options.beforeDestroy, res.beforeDestroy );
-
-                        // call beforeCreate hook manually because the component is already created
-                        res.beforeCreate.forEach( fn => fn.apply( vm ) );
-                     }
+                     attachRenderFunctions( vm, res );
                   }
                   vm.$mount( anchorElement, true );
                   areaElement.appendChild( anchorElement );
@@ -101,7 +90,7 @@ export function bootstrap( {}, adapterServices ) {
                   provideComponents( controls.map( artifactProvider.forControl ), [ controlInjectionsMixin ], components.controls )
                ] ).then( ( [ module, controls ] ) => Vue.extend( {
                   // modules loaded with the vue-loader have a _Ctor property which causes them to be non-
-                  // extensible with Vue.extend. Override to make the module extensible.
+                  // extensible with Vue.extend. Override to make sure the component is extensible.
                   ...module,
                   _Ctor: null
                } ).extend( {
@@ -210,4 +199,20 @@ function compileTemplate( template, log ) {
    }
 
    return Vue.compile( template );
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function attachRenderFunctions( vm, fns ) {
+   vm.$options.render = fns.render;
+   vm.$options.staticRenderFns = fns.staticRenderFns;
+
+   // attach beforeCreate, beforeDestroy hooks to enable hot reload
+   if( fns.beforeCreate && fns.beforeDestroy ) {
+      vm.$options.beforeCreate.push.apply( vm.$options.beforeCreate, fns.beforeCreate );
+      vm.$options.beforeDestroy.push.apply( vm.$options.beforeDestroy, fns.beforeDestroy );
+
+      // call beforeCreate hook manually because the component is already created
+      fns.beforeCreate.forEach( fn => fn.apply( vm ) );
+   }
 }
