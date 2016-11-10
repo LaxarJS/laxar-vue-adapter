@@ -13,13 +13,20 @@
 
 import Vue from 'vue';
 
+const WIDGET_PROPERTY = '_widget';
+
 export const technology = 'vue';
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export function bootstrap( {}, { widgetLoader, artifactProvider, log } ) {
+export function bootstrap( {}, adapterServices ) {
 
+   const widgetServices = {};
+   const { widgetLoader, artifactProvider, log } = adapterServices;
    const { adapterErrors } = widgetLoader;
+
+   const widgetInjectionsMixin = injectionsMixin( widgetServiceFactory );
+   const controlInjectionsMixin = injectionsMixin( controlServiceFactory );
 
    const components = {
       widgets: {},
@@ -36,14 +43,20 @@ export function bootstrap( {}, { widgetLoader, artifactProvider, log } ) {
    function create( { widgetName, anchorElement, services, onBeforeControllerCreation } ) {
 
       const provider = artifactProvider.forWidget( widgetName );
+      const widget = services.axContext.widget;
+      const mixins = [
+         { beforeCreate() { this[ WIDGET_PROPERTY ] = widget; } },
+         widgetInjectionsMixin
+      ];
 
-      return provideComponent( provider, components.widgets )
+      widgetServices[ widget.id ] = services;
+
+      return provideComponent( provider, mixins, components.widgets )
          .then( Component => {
-            const mixin = injectionsMixin( Component.options.injections, services );
 
-            onBeforeControllerCreation( mixin.injections );
+            onBeforeControllerCreation( services );
 
-            const vm = new Component( { mixins: [ mixin ] } );
+            const vm = new Component( { data: services.axContext } );
 
             return {
                domAttachTo( areaElement, templateHtml ) {
@@ -80,26 +93,23 @@ export function bootstrap( {}, { widgetLoader, artifactProvider, log } ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   function provideComponent( provider, cache = {} ) {
+   function provideComponent( provider, mixins = [], cache = {} ) {
       return provider.descriptor()
          .then( ( { name, controls = [] } ) => {
             if( !cache[ name ] ) {
                cache[ name ] = Promise.all( [
                   provider.module(),
-                  provideComponents( controls.map( artifactProvider.forControl ), components.controls )
+                  provideComponents( controls.map( artifactProvider.forControl ), [ controlInjectionsMixin ], components.controls )
                ] ).then( ( [ module, controls ] ) => Vue.extend( {
                   // modules loaded with the vue-loader have a _Ctor property which causes them to be non-
-                  // extensible with Vue.extend
+                  // extensible with Vue.extend. Override to make the module extensible.
                   ...module,
-                  _Ctor: null,
-                  // store name from descriptor so it is available to provideComponents and so that
-                  // components can be nested recursively in their HTML templates
+                  _Ctor: null
+               } ).extend( {
                   name,
-                  // register control components locally, but also allow modules to just import
-                  // components themselves
+                  mixins,
                   components: {
-                     ...controls,
-                     ...module.components
+                     ...controls
                   }
                } ) );
             }
@@ -110,8 +120,8 @@ export function bootstrap( {}, { widgetLoader, artifactProvider, log } ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   function provideComponents( providers, cache = {} ) {
-      return Promise.all( providers.map( provider => provideComponent( provider, cache ) ) )
+   function provideComponents( providers, mixins = [], cache = {} ) {
+      return Promise.all( providers.map( provider => provideComponent( provider, mixins, cache ) ) )
          .then( components => components.reduce( ( components, component ) => {
             const { name } = component.options;
             components[ name ] = component;
@@ -121,25 +131,73 @@ export function bootstrap( {}, { widgetLoader, artifactProvider, log } ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   function injectionsMixin( injections = [], services ) {
-      return {
-         beforeCreate() {
-            this.$injections = injections
-               .map( name => this.$options.injections[ name ] );
-         },
-         data() {
-            return this.$options.injections.axContext;
-         },
-         injections: [ 'axContext', ...injections ].reduce( ( injections, injection ) => {
-            if( !services[ injection ] ) {
-               throw adapterErrors.unknownInjection( { technology, injection, widgetName } );
-            }
-            injections[ injection ] = services[ injection ];
-            return injections;
-         }, {} )
-      };
+   function widgetServiceFactory( injection ) {
+      const {
+         id: widgetId,
+         name: widgetName
+      } = this[ WIDGET_PROPERTY ];
+      const services = widgetServices[ widgetId ];
+
+      if( !services ) {
+         throw new Error( 'Failed to lookup services for widget ' + widgetId );
+      }
+      if( !services[ injection ] ) {
+         throw adapterErrors.unknownInjection( { technology, injection, widgetName } );
+      }
+      return services[ injection ];
    }
 
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function controlServiceFactory( injection ) {
+      const services = {
+         axConfiguration: adapterServices.configuration,
+         axGlobalEventBus: adapterServices.globalEventBus,
+         axGlobalLog: adapterServices.log,
+         axGlobalStorage: adapterServices.storage,
+         axHeartbeat: adapterServices.heartbeat,
+         axTooling: adapterServices.toolingProviders
+      };
+
+      if( services[ injection ] ) {
+         return services[ injection ];
+      }
+      if( injection === 'axWidgetServices' ) {
+         let vm = this;
+         while( vm && !vm[ WIDGET_PROPERTY ] ) {
+            vm = vm.$parent;
+         }
+         if( vm ) {
+            const {
+               id: widgetId,
+               name: widgetName
+            } = vm[ WIDGET_PROPERTY ];
+            return widgetServices[ widgetId ];
+         }
+         throw new Error( 'Failed to lookup widget services' );
+      }
+      throw adapterErrors.unknownInjection( { technology, injection, widgetName: 'unknown' } );
+   }
+
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function injectionsMixin( serviceFactory ) {
+   return {
+      beforeCreate() {
+         const injections = this.$options.injections || [];
+
+         this.$injections = [];
+         this.$options.injections = {};
+
+         injections.forEach( injection => {
+            const service = serviceFactory.call( this, injection );
+            this.$injections.push( service );
+            this.$options.injections[ injection ] = service;
+         } );
+      }
+   };
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,8 +207,7 @@ function compileTemplate( template, log ) {
       return template; // already compiled, return unmodified
    }
    if( !Vue.compile ) {
-      log.error( 'Compiling templates on-the-fly requires "vue" to resolve to a standalone build of Vue.js.' );
-      return {};
+      throw new Error( 'Compiling templates on-the-fly requires "vue" to resolve to a standalone build of Vue.js.' );
    }
 
    return Vue.compile( template );

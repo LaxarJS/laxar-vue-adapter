@@ -137,10 +137,10 @@ with LaxarJS.
 
 ### Injections
 
-_LaxarJS_ [widget services](https://github.com/LaxarJS/laxar/blob/master/docs/manuals/widget_services.md) can
-be injected into your _Vue.js_ component by using the `injections` option. Your component will then be
-instantiated with an `injections` option containing the requested services. The injections will also be
-available as `this.$injections` in your component.
+_LaxarJS_ [widget services](https://github.com/LaxarJS/laxar/blob/master/docs/manuals/widget_services.md)
+can be injected into your _Vue.js_ component by using the `injections` option. Your component will then
+be instantiated with an `injections` option containing the requested services. The injections will also
+be available as `this.$injections` in your component.
 
 ```js
 export default {
@@ -154,13 +154,14 @@ export default {
 };
 ```
 
-### Default injections, axContext
+
+### axContext
 
 The [`axContext`](https://github.com/LaxarJS/laxar/blob/master/docs/manuals/widget_services.md#axcontext)
-service is automatically injected. It can be accessed via the `$data` property or as
-`this.$options.injections.axContext`. It does not appear in `this.$injections` unless you explicitly specify
-it in your component's `injections` option. Its presence in the component's `$data` allows you to easily
-access the `id()` generator, the event bus and the features configured for your particular widget instance.
+service is automatically injected. It can be accessed via the `$data` property. It does not appear in
+`this.$options.injections.axContext` or `this.$injections` unless you explicitly specify it in your
+component's `injections` option. Its presence in the component's `$data` allows you to easily access the
+`id()` generator, the event bus and the features configured for your particular widget instance.
 
 ```js
 export default {
@@ -219,6 +220,13 @@ export default {
 };
 </script>
 ```
+
+
+### Injections in controls
+
+Controls can access some global services via injections. The services of the widget that uses the control
+can be injected as `axWidgetServices`.
+
 
 ### Theming
 
