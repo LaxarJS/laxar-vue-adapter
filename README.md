@@ -2,16 +2,16 @@
 
 > Implement _[LaxarJS][laxar]_ widgets and controls with _[Vue.js][vue]_.
 
-- [Installation](#installation)
-- [Getting started](#getting-started)
-  - [Separate files](#separate-files)
-  - [Single file components](#single-file-components)
-- [LaxarJS integration](#laxarjs-integration)
-  - [Injections](#injections)
-  - [axContext](#axcontext)
-  - [Controls](#controls)
-  - [Theming](#theming)
-  
+* [Installation](#installation)
+* [Getting started](#getting-started)
+  * [Separate files](#separate-files)
+  * [Single file components](#single-file-components)
+* [LaxarJS integration](#laxarjs-integration)
+  * [Injections](#injections)
+  * [axContext](#axcontext)
+  * [Controls](#controls)
+  * [Theming](#theming)
+
 ## Installation
 
 You can install this module via _NPM_, _Bower_ or just place the `.js` file somewhere it can be found.
@@ -132,15 +132,15 @@ module.exports = {
 With the basic setup described above, simple _Vue_ components should _just work_.
 If you are developing anything useful you probably need to interact with the LaxarJS runtime in some way.
 The following sections will describe how the `laxar-vue-loader` provides a (mostly) non-invasive integration
-with LaxarJS.
+with _LaxarJS_.
 
 
 ### Injections
 
-_LaxarJS_ [widget services](https://github.com/LaxarJS/laxar/blob/master/docs/manuals/widget_services.md)
-can be injected into your _Vue.js_ component by using the `injections` option. Your component will then
-be instantiated with an `injections` option containing the requested services. The injections will also
-be available as `this.$injections` in your component.
+_LaxarJS_ [widget services](https://laxarjs.org/docs/laxar-v2-latest/manuals/widget_services) can be injected
+into your _Vue.js_ component by using the `injections` option. Your component will then be provided with a
+list of the requested services in `this.$injections`. An object mapping the injection names to the actual
+services is also available as `this.$options.injections`.
 
 ```js
 export default {
@@ -157,7 +157,7 @@ export default {
 
 ### axContext
 
-The [`axContext`](https://github.com/LaxarJS/laxar/blob/master/docs/manuals/widget_services.md#axcontext)
+The [`axContext`](https://laxarjs.org/docs/laxar-v2-latest/manuals/widget_services#-axcontext-)
 service is automatically injected. It can be accessed via the `$data` property. It does not appear in
 `this.$options.injections.axContext` or `this.$injections` unless you explicitly specify it in your
 component's `injections` option. Its presence in the component's `$data` allows you to easily access the
@@ -206,6 +206,7 @@ as a component with the name specified in its `control.json`.
 ```
 
 ```vue
+<!-- my-widget.vue -->
 <template>
 <div>This is my widget</div>
 <my-vue-control>It's using a control</my-vue-control>
@@ -224,8 +225,30 @@ export default {
 
 #### Injections in controls
 
-Controls can access some global services via injections. The services of the widget that uses the control
-can be injected as `axWidgetServices`.
+Controls can access the following global services via injections:
+
+* [`axConfiguration`](http://laxarjs.org/docs/laxar-v2-latest/manuals/widget_services#-axconfiguration-)
+* [`axGlobalEventBus`](http://laxarjs.org/docs/laxar-v2-latest/manuals/widget_services#-axglobaleventbus-)
+* [`axGlobalLog`](http://laxarjs.org/docs/laxar-v2-latest/manuals/widget_services#-axgloballog-)
+* [`axGlobalStorage`](http://laxarjs.org/docs/laxar-v2-latest/manuals/widget_services#-axglobalstorage-)
+* [`axHeartbeat`](http://laxarjs.org/docs/laxar-v2-latest/manuals/widget_services#-axheartbeat-)
+* [`axTooling`](http://laxarjs.org/docs/laxar-v2-latest/manuals/widget_services#-axtooling-)
+
+
+#### axWidgetServices
+
+The services of the widget instance that uses the control can be injected as `axWidgetServices`.
+
+```js
+// my-vue-control.js
+export default {
+   injections: [ 'axWidgetServices' ],
+   created() {
+      const [ widgetServices ] = this.$injections;
+      widgetServices.axLog.info( 'I\'m a control using my widget\'s logger!' );
+    }
+  };
+```
 
 
 ### Theming

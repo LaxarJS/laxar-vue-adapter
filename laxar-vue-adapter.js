@@ -46,15 +46,14 @@ export function bootstrap( {}, adapterServices ) {
       const widget = services.axContext.widget;
       const mixins = [
          { beforeCreate() { this[ WIDGET_PROPERTY ] = widget; } },
-         widgetInjectionsMixin
+         widgetInjectionsMixin,
+         { beforeCreate() { onBeforeControllerCreation( /* this.$options.injections */ services ); } }
       ];
 
       widgetServices[ widget.id ] = services;
 
       return provideComponent( provider, mixins, components.widgets )
          .then( Component => {
-
-            onBeforeControllerCreation( services );
 
             const vm = new Component( { data: services.axContext } );
 
