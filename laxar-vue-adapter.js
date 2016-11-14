@@ -22,7 +22,7 @@ export const technology = 'vue';
 export function bootstrap( {}, adapterServices ) {
 
    const widgetServices = {};
-   const { widgetLoader, artifactProvider, log } = adapterServices;
+   const { widgetLoader, artifactProvider } = adapterServices;
    const { adapterErrors } = widgetLoader;
 
    const widgetInjectionsMixin = injectionsMixin( widgetServiceFactory );
@@ -60,7 +60,7 @@ export function bootstrap( {}, adapterServices ) {
             return {
                domAttachTo( areaElement, templateHtml ) {
                   if( templateHtml ) {
-                     const res = compileTemplate( templateHtml, log );
+                     const res = compileTemplate( templateHtml );
                      attachRenderFunctions( vm, res );
                   }
                   vm.$mount( anchorElement, true );
@@ -127,7 +127,7 @@ export function bootstrap( {}, adapterServices ) {
       const services = widgetServices[ widgetId ];
 
       if( !services ) {
-         throw new Error( 'Failed to lookup services for widget ' + widgetId );
+         throw new Error( `Failed to lookup services for ${widgetName} '${widgetId}'` );
       }
       if( !services[ injection ] ) {
          throw adapterErrors.unknownInjection( { technology, injection, widgetName } );
@@ -156,10 +156,7 @@ export function bootstrap( {}, adapterServices ) {
             vm = vm.$parent;
          }
          if( vm ) {
-            const {
-               id: widgetId,
-               name: widgetName
-            } = vm[ WIDGET_PROPERTY ];
+            const { id: widgetId } = vm[ WIDGET_PROPERTY ];
             return widgetServices[ widgetId ];
          }
          throw new Error( 'Failed to lookup widget services' );
@@ -190,7 +187,7 @@ function injectionsMixin( serviceFactory ) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function compileTemplate( template, log ) {
+function compileTemplate( template ) {
    if( typeof template === 'object' && typeof template.render === 'function' ) {
       return template; // already compiled, return unmodified
    }
@@ -209,8 +206,8 @@ function attachRenderFunctions( vm, fns ) {
 
    // attach beforeCreate, beforeDestroy hooks to enable hot reload
    if( fns.beforeCreate && fns.beforeDestroy ) {
-      vm.$options.beforeCreate.push.apply( vm.$options.beforeCreate, fns.beforeCreate );
-      vm.$options.beforeDestroy.push.apply( vm.$options.beforeDestroy, fns.beforeDestroy );
+      vm.$options.beforeCreate.push( ...fns.beforeCreate );
+      vm.$options.beforeDestroy.push( ...fns.beforeDestroy );
 
       // call beforeCreate hook manually because the component is already created
       fns.beforeCreate.forEach( fn => fn.apply( vm ) );
