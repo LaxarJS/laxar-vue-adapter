@@ -63,8 +63,8 @@ export function bootstrap( {}, adapterServices ) {
                      const res = compileTemplate( templateHtml );
                      attachRenderFunctions( vm, res );
                   }
-                  vm.$mount( anchorElement, true );
-                  areaElement.appendChild( anchorElement );
+                  vm.$mount();
+                  areaElement.appendChild( vm.$el );
                },
                domDetach() {
                   const parent = anchorElement.parentNode;
@@ -206,6 +206,9 @@ function attachRenderFunctions( vm, fns ) {
 
    // attach beforeCreate, beforeDestroy hooks to enable hot reload
    if( fns.beforeCreate && fns.beforeDestroy ) {
+      vm.$options.beforeCreate = vm.$options.beforeCreate || [];
+      vm.$options.beforeDestroy = vm.$options.beforeDestroy || [];
+
       vm.$options.beforeCreate.push( ...fns.beforeCreate );
       vm.$options.beforeDestroy.push( ...fns.beforeDestroy );
 
