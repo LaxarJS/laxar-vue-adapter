@@ -19,11 +19,10 @@ export const technology = 'vue';
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export function bootstrap( {}, adapterServices ) {
+export function bootstrap( _, adapterServices ) {
 
    const widgetServices = {};
-   const { widgetLoader, artifactProvider } = adapterServices;
-   const { adapterErrors } = widgetLoader;
+   const { adapterUtilities, artifactProvider } = adapterServices;
 
    const widgetInjectionsMixin = injectionsMixin( widgetServiceFactory );
    const controlInjectionsMixin = injectionsMixin( controlServiceFactory );
@@ -34,8 +33,7 @@ export function bootstrap( {}, adapterServices ) {
    };
 
    return {
-      create,
-      technology
+      create
    };
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -87,7 +85,11 @@ export function bootstrap( {}, adapterServices ) {
             if( !cache[ name ] ) {
                cache[ name ] = Promise.all( [
                   provider.module(),
-                  provideComponents( controls.map( artifactProvider.forControl ), [ controlInjectionsMixin ], components.controls )
+                  provideComponents(
+                     controls.map( artifactProvider.forControl ),
+                     [ controlInjectionsMixin ],
+                     components.controls
+                  )
                ] ).then( ( [ module, controls ] ) => Vue.extend( {
                   // modules loaded with the vue-loader have a _Ctor property which causes them to be non-
                   // extensible with Vue.extend. Override to make sure the component is extensible.
@@ -130,7 +132,7 @@ export function bootstrap( {}, adapterServices ) {
          throw new Error( `Failed to lookup services for ${widgetName} '${widgetId}'` );
       }
       if( !services[ injection ] ) {
-         throw adapterErrors.unknownInjection( { technology, injection, widgetName } );
+         throw adapterUtilities.unknownInjection( { technology, injection, widgetName } );
       }
       return services[ injection ];
    }
@@ -161,7 +163,7 @@ export function bootstrap( {}, adapterServices ) {
          }
          throw new Error( 'Failed to lookup widget services' );
       }
-      throw adapterErrors.unknownInjection( { technology, injection, widgetName: 'unknown' } );
+      throw adapterUtilities.unknownInjection( { technology, injection, widgetName: 'unknown' } );
    }
 
 }
@@ -192,9 +194,10 @@ function compileTemplate( template ) {
       return template; // already compiled, return unmodified
    }
    if( !Vue.compile ) {
-      throw new Error( 'Compiling templates on-the-fly requires "vue" to resolve to a standalone build of Vue.js.' );
+      throw new Error(
+         'Compiling templates on-the-fly requires "vue" to resolve to a standalone build of Vue.js.'
+      );
    }
-
    return Vue.compile( template );
 }
 

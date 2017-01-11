@@ -4,7 +4,7 @@
   "description": "Write LaxarJS widgets and controls with Vue.js",
   "main": "laxar-vue-adapter.js",
   "peerDependencies": {
-    "laxar": "^2.0.0-alpha.9",
+    "laxar": "^2.0.0-alpha.12",
     "vue": "^2.0.3"
   },
   "keywords": [
