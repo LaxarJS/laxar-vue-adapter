@@ -38,14 +38,14 @@ export function bootstrap( _, adapterServices ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   function create( { widgetName, anchorElement, services, onBeforeControllerCreation } ) {
+   function create( { widgetName, anchorElement, services, provideServices } ) {
 
       const provider = artifactProvider.forWidget( widgetName );
       const widget = services.axContext.widget;
       const mixins = [
          { beforeCreate() { this[ WIDGET_PROPERTY ] = widget; } },
          widgetInjectionsMixin,
-         { beforeCreate() { onBeforeControllerCreation( /* this.$options.injections */ services ); } }
+         { beforeCreate() { provideServices( /* this.$options.injections */ services ); } }
       ];
 
       widgetServices[ widget.id ] = services;
