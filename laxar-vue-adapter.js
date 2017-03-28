@@ -62,7 +62,8 @@ export function bootstrap( _, adapterServices ) {
                      attachRenderFunctions( vm, res );
                   }
                   vm.$mount();
-                  areaElement.appendChild( vm.$el );
+                  anchorElement.appendChild( vm.$el );
+                  areaElement.appendChild( anchorElement );
                },
                domDetach() {
                   const parent = anchorElement.parentNode;
