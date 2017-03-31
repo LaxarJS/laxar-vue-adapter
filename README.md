@@ -12,10 +12,16 @@
   * [Controls](#controls)
   * [Theming](#theming)
 
+
 ## Installation
 
-You can install this module via _NPM_, _Bower_ or just place the `.js` file somewhere it can be found.
-Just make sure your JavaScript pipeline supports ES2015 and Object spread.
+The recommended installation is through NPM:
+
+```console
+npm install --save laxar-vue-adapter
+```
+
+If using the source module instead, you need to ensure that the `.js` file is loaded with ES2015 support, plus support for Object spread.
 
 
 ## Getting started

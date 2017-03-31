@@ -26,8 +26,9 @@ export const descriptor = {
    }
 };
 
-export const component = {
-   data: () => ({ test: 'ok' })
+export const module = {
+   data: () => ({ test: 'ok' }),
+   created() {}
 };
 
 export const configuration = {

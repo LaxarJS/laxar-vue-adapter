@@ -14,17 +14,22 @@
 import Vue from 'vue';
 
 const WIDGET_PROPERTY = '_axWidget';
+const INJECTIONS_PROPERTY = '_axWidgetInjections';
 
 /**
  * Produces a Vue.js mixin that allows widgets to declare and access their injections.
+ *
+ * @param {...String} injections
+ *    a list of injection names. The respective services will be available in the same
+ *    order to the instance as `this.injections`.
+ *
+ * @return {Object}
+ *    a Vue.js mixin that allowws the adapter to register the specified injections
  */
 export function injections( ...injections ) {
    return {
       beforeCreate() {
-         this[ WIDGET_PROPERTY ] = {
-            ...this[ WIDGET_PROPERTY ],
-            injections
-         }
+         this[ INJECTIONS_PROPERTY ] = injections;
       }
    };
 }
@@ -61,13 +66,12 @@ export function bootstrap( _, adapterServices ) {
       const mixins = [
          {
             beforeCreate() {
-               this[ WIDGET_PROPERTY ] = { ...this[ WIDGET_PROPERTY ], ...widget };
+               this[ WIDGET_PROPERTY ] = widget;
             }
          },
          widgetInjectionsMixin,
          {
             beforeCreate() {
-               console.log( 'DELETE ME set vueComponent', this );
                services.vueComponent = this;
                provideServices( /* this.$options.injections */ services );
             }
@@ -201,7 +205,7 @@ function injectionsMixin( serviceFactory ) {
    return {
       // run right before component creation to make sure that `injections` are available
       beforeCreate() {
-         const { injections } = this[ WIDGET_PROPERTY ];
+         const injections = this[ INJECTIONS_PROPERTY ];
          if( injections ) {
             this.injections = injections.map( name => serviceFactory.call( this, name ) );
          }

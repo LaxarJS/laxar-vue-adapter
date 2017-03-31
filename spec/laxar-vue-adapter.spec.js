@@ -3,7 +3,7 @@
  * Released under the MIT license.
  * http://laxarjs.org/license
  */
-import { bootstrap, technology } from '../laxar-vue-adapter';
+import { bootstrap, technology, injections } from '../laxar-vue-adapter';
 import * as widgetData from './widget_data';
 
 describe( 'A vue widget adapter module', () => {
@@ -28,7 +28,7 @@ describe( 'A vue widget adapter module', () => {
 
       beforeEach( () => {
          artifacts = { widgets: [ widgetData ], controls: [] };
-         services = { adapterUtilities: createAdapterUtilitiesMock() };
+         services = createAdapterServicesMock( artifacts );
          factory = bootstrap( artifacts, services );
       } );
 
@@ -51,26 +51,40 @@ describe( 'a vue widget adapter factory', () => {
    let factory;
 
    let anchorElement;
-   let fakeModule;
+   let module;
    let provideServices;
    let environment;
+
+   let receivedInjections;
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    beforeEach( () => {
-      fakeModule = { create: jasmine.createSpy( 'some-widget.create' ) };
+      module = {
+         ...widgetData.module,
+         created: jasmine.createSpy( 'some-widget.created' ).and.callFake( function() {
+            receivedInjections = this.injections;
+         } )
+      };
 
       artifacts = {
          widgets: [
-            { ...widgetData, module: fakeModule }
+            {
+               descriptor: widgetData.descriptor,
+               module
+            }
          ],
          controls: []
       };
 
-      services = { adapterUtilities: createAdapterUtilitiesMock() };
+      services = createAdapterServicesMock( artifacts );
       factory = bootstrap( artifacts, services );
 
       const context = {
+         widget: {
+            id: widgetData.configuration.id,
+            name: widgetData.configuration.name
+         },
          eventBus: { fake: 'I am a mock event bus!' },
          features: widgetData.configuration.features
       };
@@ -82,6 +96,7 @@ describe( 'a vue widget adapter factory', () => {
          anchorElement,
          provideServices,
          services: {
+            axLog: { warn() {}, info() {} },
             axContext: context,
             axEventBus: context.eventBus,
             axFeatures: context.features
@@ -92,14 +107,16 @@ describe( 'a vue widget adapter factory', () => {
    describe( 'asked to instantiate a widget adapter', () => {
 
       let adapter;
-      beforeEach( () => {
-         adapter = factory.create( environment );
+      beforeEach( done => {
+         factory.create( environment )
+            .then( result => { adapter = result; } )
+            .then( done );
       } );
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      it( 'creates the widget controller', () => {
-         expect( fakeModule.create ).toHaveBeenCalled();
+      it( 'creates the widget component', () => {
+         expect( module.created ).toHaveBeenCalled();
       } );
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -111,10 +128,9 @@ describe( 'a vue widget adapter factory', () => {
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       it( 'returns an adapter API', () => {
-         expect( adapter ).toEqual( {
-            domAttachTo: jasmine.any( Function ),
-            domDetach: jasmine.any( Function )
-         } );
+         expect( adapter.domAttachTo ).toEqual( jasmine.any( Function ) );
+         expect( adapter.domDetach ).toEqual( jasmine.any( Function ) );
+         expect( adapter.destroy ).toEqual( jasmine.any( Function ) );
       } );
 
    } );
@@ -123,23 +139,45 @@ describe( 'a vue widget adapter factory', () => {
 
    describe( 'asked to instantiate a widget controller with injections', () => {
 
-      beforeEach( () => {
-         fakeModule.injections = [ 'axContext', 'axFeatures' ];
-         factory.create( environment );
+      beforeEach( done => {
+         module.mixins = [ injections( 'axLog', 'axFeatures' ) ];
+         factory.create( environment )
+            .then( done );
       } );
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       it( 'creates that controller with injections', () => {
-         expect( fakeModule.create ).toHaveBeenCalledWith(
-            { eventBus: jasmine.any( Object ), features: jasmine.any( Object ) },
-            { myFeature: {} }
-         );
+         expect( receivedInjections[ 0 ].warn ).toEqual( jasmine.any( Function ) );
+         expect( receivedInjections[ 0 ].info ).toEqual( jasmine.any( Function ) );
+         expect( receivedInjections[ 1 ] )
+            .toEqual( { myFeature: jasmine.any( Object ) } );
       } );
 
    } );
 
 } );
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function createAdapterServicesMock( artifacts ) {
+   const widgetData = artifacts.widgets[ 0 ];
+   return {
+      artifactProvider: {
+         forWidget() {
+            return {
+               descriptor: () => Promise.resolve( widgetData.descriptor ),
+               module: () => Promise.resolve( widgetData.module )
+            };
+         },
+         forControl() {
+            // no controls in the test yet
+            expect( true ).toBe( false );
+         }
+      },
+      adapterUtilities: createAdapterUtilitiesMock()
+   };
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
