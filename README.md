@@ -20,21 +20,16 @@ Just make sure your JavaScript pipeline supports ES2015 and Object spread.
 
 ## Getting started
 
-You can either use the familiar directory structure with separate `.js`, `.html`
-and `.css` files, or you can use the [`vue-loader`][vue-loader] and put the whole
-widget into a single `.vue` file.
+You can either use the familiar directory structure for LaxarJS widgets, with separate `.js`, `.html` and `.css` files, or you can use the [`vue-loader`][vue-loader] and put the whole widget into a single `.vue` file.
 
-In any case, your widget module will have to export an object of [_Vue_ options][vue-options].
-These will be passed to `Vue.extend()` by the adapter (together with some extras to enable
-widget service [injections](#injections)) so make sure you use options that are supported
-in component definitions.
+In any case, your widget module will have to export an object of [_Vue.js_ options][vue-options].
+These will be passed to `Vue.extend()` by the adapter (together with some extras to enable widget service [injections](#injections)) so make sure you use options that are supported in component definitions.
 
 
 ### Separate files
 
-Note that in this case the template will be compiled on-the-fly in the user's browser and
-might incur a slight performance penalty. You will also have to make sure that `vue` resolves
-to the so-called "[standalone build][vue-standalone]" of _Vue.js_.
+Note that in this case the template will be compiled on-the-fly in the user's browser and might incur a slight performance penalty.
+You will also have to make sure that `vue` resolves to the so-called "[standalone build][vue-standalone]" of _Vue.js_.
 
 ```html
 <!-- default.theme/my-widget.html -->
@@ -58,10 +53,9 @@ export default {
 }
 ```
 
-You have to make sure `laxar-vue-adapter` has access to [`Vue.compile`][vue-compile] to compile the template
-HTML. This method is not part of _Vue.js'_ default _NPM_ package. If you are using [webpack][webpack] (which
-you absolutely should) you can use the standalone build of _Vue.js_ by defining an alias in your resolve
-configuration:
+You have to make sure `laxar-vue-adapter` has access to [`Vue.compile`][vue-compile] to compile the template HTML.
+This method is not part of _Vue.js'_ default _NPM_ package.
+If you are using [webpack][webpack] (which you absolutely should) you can use the standalone build of _Vue.js_ by defining an alias in your resolve configuration:
 
 ```js
 // webpack.config.js
@@ -77,8 +71,7 @@ module.exports = {
 
 ### Single file components
 
-In this example the `vue-loader` will preprocess the `.vue` file and compile the template to
-a JavaScript function.
+In this example the `vue-loader` will preprocess the `.vue` file and compile the template to a JavaScript function.
 
 ```vue
 <!-- my-widget.vue -->
@@ -131,25 +124,23 @@ module.exports = {
 
 With the basic setup described above, simple _Vue_ components should _just work_.
 If you are developing anything useful you probably need to interact with the LaxarJS runtime in some way.
-The following sections will describe how the `laxar-vue-loader` provides a (mostly) non-invasive integration
-with _LaxarJS_.
+The following sections will describe how the `laxar-vue-loader` provides a (mostly) non-invasive integration with _LaxarJS_.
 
 
 ### Injections
 
-_LaxarJS_ [widget services](https://laxarjs.org/docs/laxar-v2-latest/manuals/widget_services) can be injected
-into your _Vue.js_ component by using the `injections` option. Your component will then be provided with a
-list of the requested services in `this.$injections`. An object mapping the injection names to the actual
-services is also available as `this.$options.injections`.
+_LaxarJS_ [widget services](https://laxarjs.org/docs/laxar-v2-latest/manuals/widget_services) can be injected into your _Vue.js_ component by using the `injections` mixin provided by the `laxar-vue-loader`.
+An list of corresponding injection values is then available to the component instance as `this.injections`.
 
 ```js
+import { injections } from 'laxar-vue-loader';
 export default {
-   injections: [ 'axEventBus', 'axGlobalLog' ],
+   mixins: [ injections( 'axEventBus', 'axGlobalLog' ) ],
    created() {
-      const [ eventBus, globalLog ] = this.$injections;
-      const { axEventBus, axGlobalLog } = this.$options.injections;
-      axEventBus === eventBus;
-      axGlobalLog === globalLog;
+      const [ eventBus, log ] = this.injections;
+      eventBus.subscribe( 'beginLifecycleRequest', () => {
+         log.debug( 'So it has begun!' );
+      } );
    }
 };
 ```
@@ -157,15 +148,14 @@ export default {
 
 ### axContext
 
-The [`axContext`](https://laxarjs.org/docs/laxar-v2-latest/manuals/widget_services#-axcontext-)
-service is automatically injected. It can be accessed via the `$data` property. It does not appear in
-`this.$options.injections.axContext` or `this.$injections` unless you explicitly specify it in your
-component's `injections` option. Its presence in the component's `$data` allows you to easily access the
-`id()` generator, the event bus and the features configured for your particular widget instance.
+The [`axContext`](https://laxarjs.org/docs/laxar-v2-latest/manuals/widget_services#-axcontext-) service is automatically injected.
+It can be accessed via the `$data` property.
+The context does not appear among `this.injections` unless you explicitly specify it by using the `injections` mixin.
+Its presence in the component's `$data` allows you to easily access the `id()` generator, the event bus and the features configured for your particular widget instance.
 
 ```js
 export default {
-   template: '<b :id="id(\'some-suffix\')">{{features.mytext}}</b>',
+   template: '<b :id="id(\'some-suffix\')">{{ features.mytext }}</b>',
    created() {
       this.eventBus.subscribe( 'some-event', this.methods.eventHandler );
    },
@@ -180,9 +170,9 @@ export default {
 
 ### Controls
 
-You can specify controls in your `widget.json`. Just list a module that can resolved by the module loader.
-The control will then be [registered locally](https://vuejs.org/v2/guide/components.html#Local-Registration)
-as a component with the name specified in its `control.json`.
+You can specify controls in your `widget.json`.
+Just list a module that can resolved by the module loader.
+The control will then be [registered locally](https://vuejs.org/v2/guide/components.html#Local-Registration) as a component with the name specified in its `control.json`.
 
 ```json
 {
@@ -240,30 +230,37 @@ Controls can access the following global services via injections:
 The services of the widget instance that uses the control can be injected as `axWidgetServices`.
 
 ```js
+import { injections } from 'laxar-vue-loader';
 // my-vue-control.js
 export default {
-   injections: [ 'axWidgetServices' ],
+   mixins: [ injections( 'axWidgetServices' ) ],
    created() {
-      const [ widgetServices ] = this.$injections;
-      widgetServices.axLog.info( 'I\'m a control using my widget\'s logger!' );
+      const [ { axLog } ] = this.injections;
+      axLog.info( 'I\'m a control using my widget\'s logger!' );
     }
   };
 ```
 
 
+### Testing
+
+LaxarJS widgets and activities can be tested using [LaxarJS Mocks](http://laxarjs.org/docs/laxar--mocks-v2-latest) just like all other widgets.
+Note that the `laxar-vue-adapter` makes available the special property `axMocks.widget.vueComponent` when `axMocks.widget.load` is called, pointing to your widget Vue.js component instance.
+You can use this property to inspect your widget component data as well as its `eventBus`, and to simulate method calls.
+
+
 ### Theming
 
-Theme directories are fully supported. Additionally, if you are using the `vue-loader`, the
-default HTML and CSS can be embedded in the main `.vue` file. However, the HTML and CSS
-corresponding to the default theme will be present in the bundled application regardless of
-the theme used for bundling. If that is an issue, we recommend using separate files for the
-HTML template and CSS.
+Theme directories are fully supported.
+Additionally, if you are using the `vue-loader`, the default HTML and CSS can be embedded in the main `.vue` file.
+However, the HTML and CSS corresponding to the default theme will be present in the bundled application regardless of the theme used for bundling.
+If that is an issue, we recommend using separate files for the HTML template and CSS.
+
 
 #### Precompiling themed assets
 
 You can also use the `vue-loader` to precompile your themed HTML and CSS.
-Just specify a Vue.js component file as your `templateSource` and make sure it gets processed
-by the `vue-loader`.
+Just specify a Vue.js component file as your `templateSource` and make sure it gets processed by the `vue-loader`.
 
 
 ```json

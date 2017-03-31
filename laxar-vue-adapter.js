@@ -13,7 +13,23 @@
 
 import Vue from 'vue';
 
-const WIDGET_PROPERTY = '_widget';
+const WIDGET_PROPERTY = '_axWidget';
+
+/**
+ * Produces a Vue.js mixin that allows widgets to declare and access their injections.
+ */
+export function injections( ...injections ) {
+   return {
+      beforeCreate() {
+         this[ WIDGET_PROPERTY ] = {
+            ...this[ WIDGET_PROPERTY ],
+            injections
+         }
+      }
+   };
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export const technology = 'vue';
 
@@ -43,9 +59,19 @@ export function bootstrap( _, adapterServices ) {
       const provider = artifactProvider.forWidget( widgetName );
       const widget = services.axContext.widget;
       const mixins = [
-         { beforeCreate() { this[ WIDGET_PROPERTY ] = widget; } },
+         {
+            beforeCreate() {
+               this[ WIDGET_PROPERTY ] = { ...this[ WIDGET_PROPERTY ], ...widget };
+            }
+         },
          widgetInjectionsMixin,
-         { beforeCreate() { provideServices( /* this.$options.injections */ services ); } }
+         {
+            beforeCreate() {
+               console.log( 'DELETE ME set vueComponent', this );
+               services.vueComponent = this;
+               provideServices( /* this.$options.injections */ services );
+            }
+         }
       ];
 
       widgetServices[ widget.id ] = services;
@@ -173,17 +199,12 @@ export function bootstrap( _, adapterServices ) {
 
 function injectionsMixin( serviceFactory ) {
    return {
+      // run right before component creation to make sure that `injections` are available
       beforeCreate() {
-         const injections = this.$options.injections || [];
-
-         this.$injections = [];
-         this.$options.injections = {};
-
-         injections.forEach( injection => {
-            const service = serviceFactory.call( this, injection );
-            this.$injections.push( service );
-            this.$options.injections[ injection ] = service;
-         } );
+         const { injections } = this[ WIDGET_PROPERTY ];
+         if( injections ) {
+            this.injections = injections.map( name => serviceFactory.call( this, name ) );
+         }
       }
    };
 }
