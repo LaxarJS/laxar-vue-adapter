@@ -2,6 +2,9 @@
 
 ## Last Changes
 
+
+## v2.0.0-alpha.4
+
 - [#3](https://github.com/LaxarJS/laxar-vue-adapter/issues/3): added support for widget areas
     + NEW FEATURE: see ticket for details
 
