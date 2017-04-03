@@ -36,6 +36,7 @@ export function injections( ...injections ) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
 export const technology = 'vue';
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,13 +46,31 @@ export function bootstrap( _, adapterServices ) {
    const widgetServices = {};
    const { adapterUtilities, artifactProvider } = adapterServices;
 
-   const widgetInjectionsMixin = injectionsMixin( widgetServiceFactory );
    const controlInjectionsMixin = injectionsMixin( controlServiceFactory );
+   const widgetInjectionsMixin = injectionsMixin( widgetServiceFactory );
 
    const components = {
       widgets: {},
       controls: {}
    };
+
+   const AxWidgetArea = {
+      props: {
+         name: {
+            type: String,
+            required: true
+         }
+      },
+      render( createElement ) {
+         return createElement( 'div', { attrs: { 'data-ax-widget-area': this.name } } );
+      },
+      mounted() {
+         const { axAreaHelper } = findWidgetServices( this );
+         axAreaHelper.register( this.name, this.$el );
+      }
+   };
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    return {
       create
@@ -62,7 +81,7 @@ export function bootstrap( _, adapterServices ) {
    function create( { widgetName, anchorElement, services, provideServices } ) {
 
       const provider = artifactProvider.forWidget( widgetName );
-      const widget = services.axContext.widget;
+      const widget = { id: services.axContext.widget.id, name: widgetName };
       const mixins = [
          {
             beforeCreate() {
@@ -77,13 +96,12 @@ export function bootstrap( _, adapterServices ) {
             }
          }
       ];
-
       widgetServices[ widget.id ] = services;
 
-      return provideComponent( provider, mixins, components.widgets )
+      return provideComponent( provider, [], components.widgets )
          .then( Component => {
 
-            const vm = new Component( { data: services.axContext } );
+            const vm = new Component( { data: services.axContext, mixins } );
 
             return {
                domAttachTo( areaElement, templateHtml ) {
@@ -130,6 +148,7 @@ export function bootstrap( _, adapterServices ) {
                   name,
                   mixins,
                   components: {
+                     'ax-widget-area': AxWidgetArea,
                      ...controls
                   }
                } ) );
@@ -184,17 +203,23 @@ export function bootstrap( _, adapterServices ) {
          return services[ injection ];
       }
       if( injection === 'axWidgetServices' ) {
-         let vm = this;
-         while( vm && !vm[ WIDGET_PROPERTY ] ) {
-            vm = vm.$parent;
-         }
-         if( vm ) {
-            const { id: widgetId } = vm[ WIDGET_PROPERTY ];
-            return widgetServices[ widgetId ];
-         }
-         throw new Error( 'Failed to lookup widget services' );
+         return findWidgetServices( this );
       }
       throw adapterUtilities.unknownInjection( { technology, injection, widgetName: 'unknown' } );
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function findWidgetServices( vm ) {
+      let node = vm;
+      while( node && !node[ WIDGET_PROPERTY ] ) {
+         node = node.$parent;
+      }
+      if( node ) {
+         const widgetId = node[ WIDGET_PROPERTY ].id;
+         return widgetServices[ widgetId ];
+      }
+      throw new Error( 'Failed to lookup widget services' );
    }
 
 }

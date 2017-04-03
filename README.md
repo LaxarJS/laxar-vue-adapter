@@ -10,6 +10,8 @@
   * [Injections](#injections)
   * [axContext](#axcontext)
   * [Controls](#controls)
+  * [Widget Areas](#widget-areas)
+  * [Testing](#testing)
   * [Theming](#theming)
 
 
@@ -248,9 +250,51 @@ export default {
 ```
 
 
+### Widget Areas
+
+All Vue.js components loaded by this adapter have access to an additional component `ax-widget-area`.
+This component can be used to provide containers for nested widgets.
+
+```vue
+<!-- my-widget.vue -->
+
+<template>
+   <div>
+      <h1>Here are two areas:</h1>
+      <ax-widget-area name="first" />
+      <ax-widget-area name="second" />
+   </div>
+</template>
+
+<script>
+   <!-- export default { ... }; -->
+</script>
+```
+
+No modifications to the component JavaScript code are needed.
+Behind the scenes, the widget area component uses the `axAreaHelper` widget service injection, to provide additional widget areas:
+
+```js
+   // my-page.json, areas:
+   "content": [
+      {
+         "widget": "my-widget",
+         "id": "widgetX"
+      }
+   ],
+   "widgetX.left": [ /* ...more widgets... */ ],
+   "widgetX.right": [ /* ... */ ]
+```
+
+Note that once mounted, widget areas should not be destroyed until their containing page is destroyed.
+Use styling (`display: none`) to hide and show areas as needed.
+This is a necessary evil for now, as some integration technologies (such as AngularJS v1) do not support temporary removal of their DOM.
+For this reason, it is also not recommended to use a mutable expression for the `name` prop.
+
+
 ### Testing
 
-LaxarJS widgets and activities can be tested using [LaxarJS Mocks](http://laxarjs.org/docs/laxar--mocks-v2-latest) just like all other widgets.
+LaxarJS widgets and activities can be tested using [LaxarJS Mocks](http://laxarjs.org/docs/laxar-mocks-v2-latest) just like all other widgets.
 Note that the `laxar-vue-adapter` makes available the special property `axMocks.widget.vueComponent` when `axMocks.widget.load` is called, pointing to your widget Vue.js component instance.
 You can use this property to inspect your widget component data as well as its `eventBus`, and to simulate method calls.
 
