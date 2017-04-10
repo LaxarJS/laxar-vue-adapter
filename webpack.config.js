@@ -5,6 +5,7 @@
  */
 /* eslint-env node */
 
+const path = require( 'path' );
 const pkg = require( './package.json' );
 
 const webpack = require( 'laxar-infrastructure' ).webpack( {
@@ -13,7 +14,7 @@ const webpack = require( 'laxar-infrastructure' ).webpack( {
       rules: [
          {
             test: /\.js$/,
-            exclude: 'node_modules',
+            exclude: path.resolve( __dirname, 'node_modules' ),
             loader: 'babel-loader'
          }
       ]

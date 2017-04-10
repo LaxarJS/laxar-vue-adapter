@@ -36,7 +36,7 @@ These will be passed to `Vue.extend()` by the adapter (together with some extras
 
 ### Separate files
 
-Note that in this case the template will be compiled on-the-fly in the user's browser and might incur a slight performance penalty.
+When using separate files for HTML template and controller logic, the template will be compiled on-the-fly in the user's browser, incurring a slight performance penalty.
 You will also have to make sure that `vue` resolves to the so-called "[standalone build][vue-standalone]" of _Vue.js_.
 
 ```html
@@ -47,8 +47,8 @@ You will also have to make sure that `vue` resolves to the so-called "[standalon
 ```js
 // my-widget.js
 export default {
-   data: {
-      counter: 0
+   data() {
+      return { counter: 0 };
    },
    created() {
       this.interval = setInterval( () => {
@@ -56,14 +56,14 @@ export default {
       }, 1000 );
    },
    destroyed() {
-      clearInterval(this.interval);
+      clearInterval( this.interval );
    }
 }
 ```
 
 You have to make sure `laxar-vue-adapter` has access to [`Vue.compile`][vue-compile] to compile the template HTML.
 This method is not part of _Vue.js'_ default _NPM_ package.
-If you are using [webpack][webpack] (which you absolutely should) you can use the standalone build of _Vue.js_ by defining an alias in your resolve configuration:
+Using [webpack][webpack], you can use the standalone build of _Vue.js_ by defining an alias in your resolve configuration:
 
 ```js
 // webpack.config.js
@@ -89,16 +89,16 @@ In this example the `vue-loader` will preprocess the `.vue` file and compile the
 
 <script>
 export default {
-   data: {
-      counter: 0
+   data() {
+      return { counter: 0 };
    },
    created() {
-      this.interval = setInterval(() => {
+      this.interval = setInterval( () => {
          this.counter++;
-      }, 1000);
+      }, 1000 );
    },
    destroyed() {
-      clearInterval(this.interval);
+      clearInterval( this.interval );
    }
 }
 </script>
@@ -132,16 +132,16 @@ module.exports = {
 
 With the basic setup described above, simple _Vue_ components should _just work_.
 If you are developing anything useful you probably need to interact with the LaxarJS runtime in some way.
-The following sections will describe how the `laxar-vue-loader` provides a (mostly) non-invasive integration with _LaxarJS_.
+The following sections will describe how the `laxar-vue-adapter` provides a (mostly) non-invasive integration with _LaxarJS_.
 
 
 ### Injections
 
-_LaxarJS_ [widget services](https://laxarjs.org/docs/laxar-v2-latest/manuals/widget_services) can be injected into your _Vue.js_ component by using the `injections` mixin provided by the `laxar-vue-loader`.
+_LaxarJS_ [widget services](https://laxarjs.org/docs/laxar-v2-latest/manuals/widget_services) can be injected into your _Vue.js_ component by using the `injections` mixin provided by the `laxar-vue-adapter`.
 An list of corresponding injection values is then available to the component instance as `this.$injections`.
 
 ```js
-import { injections } from 'laxar-vue-loader';
+import { injections } from 'laxar-vue-adapter';
 export default {
    mixins: [ injections( 'axEventBus', 'axGlobalLog' ) ],
    created() {
@@ -238,7 +238,7 @@ Controls can access the following global services via injections:
 The services of the widget instance that uses the control can be injected as `axWidgetServices`.
 
 ```js
-import { injections } from 'laxar-vue-loader';
+import { injections } from 'laxar-vue-adapter';
 // my-vue-control.js
 export default {
    mixins: [ injections( 'axWidgetServices' ) ],
@@ -294,8 +294,8 @@ For this reason, it is also not recommended to use a mutable expression for the 
 
 ### Testing
 
-LaxarJS widgets and activities can be tested using [LaxarJS Mocks](http://laxarjs.org/docs/laxar-mocks-v2-latest) just like all other widgets.
-Note that the `laxar-vue-adapter` makes available the special property `axMocks.widget.vueComponent` when `axMocks.widget.load` is called, pointing to your widget Vue.js component instance.
+LaxarJS widgets and activities can be tested using [LaxarJS Mocks](http://laxarjs.org/docs/laxar-mocks-v2-latest) just like when using other LaxarJS integration technologies.
+Note that the `laxar-vue-adapter` makes available the special property `axMocks.widget.vueComponent` when `axMocks.widget.load` is called, referencing your widget's Vue.js component instance.
 You can use this property to inspect your widget component data as well as its `eventBus`, and to simulate method calls.
 
 
@@ -309,9 +309,10 @@ If that is an issue, we recommend using separate files for the HTML template and
 
 #### Precompiling themed assets
 
-You can also use the `vue-loader` to precompile your themed HTML and CSS.
-Just specify a Vue.js component file as your `templateSource` and make sure it gets processed by the `vue-loader`.
+Using external (S)CSS is supported, just like with other integration technologies.
 
+You can also use the `vue-loader` to precompile your *themed HTML and CSS.*
+Just specify a Vue.js component file as your `templateSource` and make sure it gets processed by the `vue-loader`.
 
 ```json
 {
@@ -332,6 +333,8 @@ Just specify a Vue.js component file as your `templateSource` and make sure it g
 }
 </style>
 ```
+
+In this case, the component scripting logic could be kept in a `my-widget.js` at the widget's top-level.
 
 
 [laxar]: https://laxarjs.org/

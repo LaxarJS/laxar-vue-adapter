@@ -5,7 +5,7 @@
   "main": "laxar-vue-adapter.js",
   "browser": "dist/laxar-vue-adapter.js",
   "peerDependencies": {
-    "laxar": "^2.0.0-alpha.20",
+    "laxar": "^2.0.0-alpha.22",
     "vue": "^2.2.5"
   },
   "scripts": {
@@ -39,7 +39,7 @@
     "laxar-infrastructure": "^0.1.0-alpha.6",
     "laxar-loader": "^2.0.0-alpha.1",
     "vue": "^2.2.5",
-    "webpack": "^2.2.0",
+    "webpack": "^2.3.0",
     "webpack-dev-server": "^2.4.1"
   },
   "dependencies": {}

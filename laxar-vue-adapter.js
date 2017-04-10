@@ -129,6 +129,7 @@ export function bootstrap( _, adapterServices ) {
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function provideComponent( provider, mixins = [], cache = {} ) {
+
       return provider.descriptor()
          .then( ( { name, controls = [] } ) => {
             if( !cache[ name ] ) {
@@ -142,7 +143,11 @@ export function bootstrap( _, adapterServices ) {
                ] ).then( ( [ module, controls ] ) => Vue.extend( {
                   // modules loaded with the vue-loader have a _Ctor property which causes them to be non-
                   // extensible with Vue.extend. Override to make sure the component is extensible.
-                  ...module,
+                  ...(
+                     module && module.__esModule && module.default !== undefined ?
+                     module.default :
+                     module
+                  ),
                   _Ctor: null
                } ).extend( {
                   name,
