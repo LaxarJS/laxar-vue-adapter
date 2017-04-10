@@ -1,6 +1,6 @@
 {
   "name": "laxar-vue-adapter",
-  "version": "2.0.0-alpha.4",
+  "version": "2.0.0-beta.0",
   "description": "Write LaxarJS widgets and controls with Vue.js",
   "main": "laxar-vue-adapter.js",
   "browser": "dist/laxar-vue-adapter.js",
