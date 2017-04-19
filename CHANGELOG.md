@@ -2,6 +2,9 @@
 
 ## Last Changes
 
+
+## v2.0.0-rc.0
+
 - [#4](https://github.com/LaxarJS/laxar-vue-adapter/issues/4): additional docs
 
 
