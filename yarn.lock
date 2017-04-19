@@ -60,7 +60,7 @@ ajv-keywords@^1.0.0, ajv-keywords@^1.1.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/ajv-keywords/-/ajv-keywords-1.5.1.tgz#314dd0a4b3368fad3dfcdc54ede6171b886daf3c"
 
-ajv@^4.10.0, ajv@^4.7.0, ajv@^4.9.1:
+ajv@^4.11.5, ajv@^4.7.0, ajv@^4.9.1:
   version "4.11.6"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-4.11.6.tgz#947e93049790942b2a2d60a8289b28924d39f987"
   dependencies:
@@ -230,7 +230,7 @@ async@1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/async/-/async-1.4.0.tgz#35f86f83c59e0421d099cd9a91d8278fb578c00d"
 
-async@2.0.1, async@^2.0.0:
+async@2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/async/-/async-2.0.1.tgz#b709cc0280a9c36f09f4536be823c838a9049e25"
   dependencies:
@@ -240,7 +240,7 @@ async@^1.5.2:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/async/-/async-1.5.2.tgz#ec6a61ae56480c0c3cb241c95618e20892f9672a"
 
-async@^2.1.2:
+async@^2.0.0, async@^2.1.2:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/async/-/async-2.3.0.tgz#1013d1051047dd320fe24e494d5c66ecaf6147d9"
   dependencies:
@@ -872,6 +872,12 @@ builtin-modules@^1.0.0:
 builtin-status-codes@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/builtin-status-codes/-/builtin-status-codes-3.0.0.tgz#85982878e21b98e1c66425e03d0174788f569ee8"
+
+bundle-loader@^0.5.5:
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/bundle-loader/-/bundle-loader-0.5.5.tgz#11fd7b08edf86a1d708efcb1eca62ca51f6c368a"
+  dependencies:
+    loader-utils "^1.0.2"
 
 bytes@2.3.0:
   version "2.3.0"
@@ -2568,9 +2574,9 @@ klaw@^1.0.0:
   optionalDependencies:
     graceful-fs "^4.1.9"
 
-laxar-infrastructure@^0.1.0-alpha.6:
-  version "0.1.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/laxar-infrastructure/-/laxar-infrastructure-0.1.0-alpha.6.tgz#709478f22159f0e39311eba743512decd2ad2ffc"
+laxar-infrastructure@^2.0.0:
+  version "2.0.0-rc.0"
+  resolved "https://registry.yarnpkg.com/laxar-infrastructure/-/laxar-infrastructure-2.0.0-rc.0.tgz#7987f341b0bdd4fdd6f6bf09eedea0b5b1dfde54"
   dependencies:
     eslint "^3.0.1"
     eslint-config-laxarjs "^0.3.0"
@@ -2589,20 +2595,21 @@ laxar-infrastructure@^0.1.0-alpha.6:
     source-map-support "^0.4.10"
     webpack-jasmine-html-runner-plugin "^0.7.0"
 
-laxar-loader@^2.0.0-alpha.1:
-  version "2.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/laxar-loader/-/laxar-loader-2.0.0-alpha.2.tgz#042f233d6f68759052069d360b45abd89cbf8c0f"
+laxar-loader@^2.0.0:
+  version "2.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/laxar-loader/-/laxar-loader-2.0.0-alpha.3.tgz#07ef184b8a5621647a81f780283284bcdc3d979c"
   dependencies:
+    bundle-loader "^0.5.5"
     json-loader "^0.5.4"
-    laxar-tooling "^2.0.0-alpha.0"
+    laxar-tooling "^2.0.0-alpha.1"
     loader-utils "^0.2.15"
     raw-loader "^0.5.1"
 
-laxar-tooling@^2.0.0-alpha.0:
-  version "2.0.0-alpha.0"
-  resolved "https://registry.yarnpkg.com/laxar-tooling/-/laxar-tooling-2.0.0-alpha.0.tgz#c547f8b2d00bc813179e190320c5cf2f266086ca"
+laxar-tooling@^2.0.0-alpha.1:
+  version "2.0.0-rc.0"
+  resolved "https://registry.yarnpkg.com/laxar-tooling/-/laxar-tooling-2.0.0-rc.0.tgz#5abaff792aa737b1829daef137de7417998d7c94"
   dependencies:
-    ajv "^4.10.0"
+    ajv "^4.11.5"
     jsonlint "^1.6.2"
     source-map-support "^0.4.2"
 
@@ -2658,7 +2665,7 @@ loader-utils@^0.2.15, loader-utils@^0.2.16, loader-utils@^0.2.5:
     json5 "^0.5.0"
     object-assign "^4.0.1"
 
-loader-utils@^1.0.3:
+loader-utils@^1.0.2, loader-utils@^1.0.3:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/loader-utils/-/loader-utils-1.1.0.tgz#c98aef488bcceda2ffb5e2de646d6a754429f5cd"
   dependencies:

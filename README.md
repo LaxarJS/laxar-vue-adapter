@@ -337,9 +337,43 @@ Just specify a Vue.js component file as your `templateSource` and make sure it g
 In this case, the component scripting logic could be kept in a `my-widget.js` at the widget's top-level.
 
 
+## Hacking the Adapter
+
+First, clone the repository and fetch the dependencies:
+
+```console
+git clone https://github.com/LaxarJS/laxar-vue-adapter.git
+cd laxar-vue-adapter
+npm install
+```
+
+To rebuild the _pre-compiled bundle_, use:
+
+```console
+npm run dist
+```
+
+Otherwise, you may need to adjust your project to load the adapter with ES2015 support.
+To pick up clone from within a LaxarJS application, you may need to modify the project's webpack resolve configuration.
+
+To _test_ the adapter, run:
+
+```console
+npm test
+```
+
+For interactive tests that can be inspected in the browser, run:
+
+```console
+npm start
+```
+
+Now you can access the spec-tests at http://localhost:8080/dist/spec/laxar-vue-adapter.spec.html
+
+
 [laxar]: https://laxarjs.org/
 [vue]: https://vuejs.org/
-[webpack]: https://webpack.github.io/
+[webpack]: https://webpack.js.org/
 [vue-options]: https://vuejs.org/v2/api/#Options-Data
 [vue-loader]: https://vue-loader.vuejs.org/en/index.html
 [vue-compile]: https://vuejs.org/v2/api/#Vue-compile
