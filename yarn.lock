@@ -1515,13 +1515,13 @@ escope@^3.6.0:
     esrecurse "^4.1.0"
     estraverse "^4.1.1"
 
-eslint-config-laxarjs@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/eslint-config-laxarjs/-/eslint-config-laxarjs-0.3.0.tgz#322dc060ade649f740062b6d5e69c523bb3b6e55"
-
 eslint-config-laxarjs@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/eslint-config-laxarjs/-/eslint-config-laxarjs-0.4.0.tgz#d15d4a44378dc18b6293107178e14dbf15e08d74"
+
+eslint-config-laxarjs@^2.0.0-rc.0:
+  version "2.0.0-rc.0"
+  resolved "https://registry.yarnpkg.com/eslint-config-laxarjs/-/eslint-config-laxarjs-2.0.0-rc.0.tgz#bef8972f85dac0ead520fe4bded7993dfe654a06"
 
 eslint@^3.0.1, eslint@^3.18.0:
   version "3.19.0"
@@ -2574,12 +2574,12 @@ klaw@^1.0.0:
   optionalDependencies:
     graceful-fs "^4.1.9"
 
-laxar-infrastructure@^2.0.0:
-  version "2.0.0-rc.0"
-  resolved "https://registry.yarnpkg.com/laxar-infrastructure/-/laxar-infrastructure-2.0.0-rc.0.tgz#7987f341b0bdd4fdd6f6bf09eedea0b5b1dfde54"
+laxar-infrastructure@^2.0.0-rc.1:
+  version "2.0.0-rc.1"
+  resolved "https://registry.yarnpkg.com/laxar-infrastructure/-/laxar-infrastructure-2.0.0-rc.1.tgz#b5e80857fd1cd7e3a4b05f63493573de53c4b073"
   dependencies:
     eslint "^3.0.1"
-    eslint-config-laxarjs "^0.3.0"
+    eslint-config-laxarjs "^2.0.0-rc.0"
     jasmine-core "^2.5.2"
     karma "^1.5.0"
     karma-chrome-launcher "^2.0.0"
@@ -2595,27 +2595,27 @@ laxar-infrastructure@^2.0.0:
     source-map-support "^0.4.10"
     webpack-jasmine-html-runner-plugin "^0.7.0"
 
-laxar-loader@^2.0.0:
-  version "2.0.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/laxar-loader/-/laxar-loader-2.0.0-alpha.3.tgz#07ef184b8a5621647a81f780283284bcdc3d979c"
+laxar-loader@^2.0.0-rc.3:
+  version "2.0.0-rc.3"
+  resolved "https://registry.yarnpkg.com/laxar-loader/-/laxar-loader-2.0.0-rc.3.tgz#010e6b541468b81add0cf6fb08718f5a8ee45351"
   dependencies:
     bundle-loader "^0.5.5"
     json-loader "^0.5.4"
-    laxar-tooling "^2.0.0-alpha.1"
+    laxar-tooling "^2.0.0-rc.2"
     loader-utils "^0.2.15"
     raw-loader "^0.5.1"
 
-laxar-tooling@^2.0.0-alpha.1:
-  version "2.0.0-rc.0"
-  resolved "https://registry.yarnpkg.com/laxar-tooling/-/laxar-tooling-2.0.0-rc.0.tgz#5abaff792aa737b1829daef137de7417998d7c94"
+laxar-tooling@^2.0.0-rc.2:
+  version "2.0.0-rc.2"
+  resolved "https://registry.yarnpkg.com/laxar-tooling/-/laxar-tooling-2.0.0-rc.2.tgz#cb30da1d51c9e17d88bfacbdff29007a49092d7a"
   dependencies:
     ajv "^4.11.5"
     jsonlint "^1.6.2"
     source-map-support "^0.4.2"
 
-laxar@^2.0.0-alpha.20:
-  version "2.0.0-alpha.22"
-  resolved "https://registry.yarnpkg.com/laxar/-/laxar-2.0.0-alpha.22.tgz#8bf3882084ffeb541ad2ab1fe266163a51a028cb"
+laxar@^2.0.0-rc.3:
+  version "2.0.0-rc.3"
+  resolved "https://registry.yarnpkg.com/laxar/-/laxar-2.0.0-rc.3.tgz#39d3388b4cfd0a432a11f58c858071b150f4a688"
   dependencies:
     navigo "4.3.6"
 

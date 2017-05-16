@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#5](https://github.com/LaxarJS/laxar-vue-adapter/issues/5): fixed dependencies in package.json
+
 
 ## v2.0.0-rc.0
 
