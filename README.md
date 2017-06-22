@@ -282,8 +282,8 @@ Behind the scenes, the widget area component uses the `axAreaHelper` widget serv
          "id": "widgetX"
       }
    ],
-   "widgetX.left": [ /* ...more widgets... */ ],
-   "widgetX.right": [ /* ... */ ]
+   "widgetX.first": [ /* ...more widgets... */ ],
+   "widgetX.second": [ /* ... */ ]
 ```
 
 Note that once mounted, widget areas should not be destroyed until their containing page is destroyed.

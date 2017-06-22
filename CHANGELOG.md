@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#6](https://github.com/LaxarJS/laxar-vue-adapter/issues/6): documentation: fixed example area names
+
 
 ## v2.0.0-rc.1
 
