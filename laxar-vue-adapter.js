@@ -106,7 +106,7 @@ export function bootstrap( _, adapterServices ) {
             return {
                domAttachTo( areaElement, templateHtml ) {
                   if( templateHtml ) {
-                     const res = compileTemplate( templateHtml );
+                     const res = compileTemplate( getDefaultExport( templateHtml ) );
                      attachRenderFunctions( vm, res );
                   }
                   vm.$mount();
@@ -143,11 +143,7 @@ export function bootstrap( _, adapterServices ) {
                ] ).then( ( [ module, controls ] ) => Vue.extend( {
                   // modules loaded with the vue-loader have a _Ctor property which causes them to be non-
                   // extensible with Vue.extend. Override to make sure the component is extensible.
-                  ...(
-                     module && module.__esModule && module.default !== undefined ?
-                     module.default :
-                     module
-                  ),
+                  ...getDefaultExport( module ),
                   _Ctor: null
                } ).extend( {
                   name,
@@ -255,6 +251,15 @@ function compileTemplate( template ) {
       );
    }
    return Vue.compile( template );
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function getDefaultExport( module ) {
+   if( module && module.__esModule && module.default !== undefined ) {
+      return module.default;
+   }
+   return module;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#10](https://github.com/LaxarJS/laxar-vue-adapter/issues/10): fixed handling of themed `.vue` templates
+
 
 ## v2.0.0
 
